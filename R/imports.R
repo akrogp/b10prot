@@ -2,6 +2,7 @@
 #' @import conflicted
 #' @import mzR
 #' @import dplyr
+#' @import tidyr
 #' @import ggplot2
 #' @import ggforce
 NULL
