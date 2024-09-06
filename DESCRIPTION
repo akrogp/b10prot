@@ -1,0 +1,16 @@
+Package: b10prot
+Title: Protein Identification for Shotgun Proteomics Data
+Version: 0.0.0.9000
+Authors@R: 
+    person("Gorka", "Prieto", email = "gorka.prieto@ehu.eus", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-6433-8452"))
+Description: A package for processing shotgun proteomics data to identify and
+    infer proteins. The input consists of Peptide-to-Spectrum Matches (PSMs) 
+    read from mzIdentML files using the mzR package. False positives are 
+    controlled using various FDR estimations based on the target-decoy approach 
+    and LPGF identification scores. Protein groups are formed using the 
+    PAnalyzer algorithm.
+License: `use_gpl3_license()`
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
