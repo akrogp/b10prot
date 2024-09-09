@@ -1,3 +1,5 @@
+# Proteomics Score Processing Functions
+
 LIMIT_PROB <- 1e-300
 LIMIT_COLOG <- -log10(LIMIT_PROB)
 
@@ -117,6 +119,52 @@ global_fdr <- function(data) {
     mutate(`Global FDR (%)` = Decoy/Target*100)
 }
 
+#' Refined False Discovery Rate (FDR) Calculation
+#'
+#' This function computes refined False Discovery Rate (FDR) estimates using a
+#' competitive approach between target and decoy identifications. It provides
+#' three types of FDR calculations: FDRn, FDRp, and FDRr, which adjust for
+#' different competitive scenarios between targets and decoys.
+#'
+#' @param data A data frame containing the identification data, including
+#' columns for the reference level, a score, and whether each identification
+#' is a decoy (`isDecoy`).
+#' @param levelRef The column name containing the reference level for each
+#' identification (e.g., protein or gene reference). This should be an unquoted
+#' column name.
+#' @param score The column name of the score used to rank the identifications.
+#' This should be an unquoted column name.
+#' @param lower_better A logical value indicating whether lower scores are
+#' better (default is `TRUE`).
+#' @param affix A string indicating the suffix of prefix used to identify decoy
+#' entries in the reference level column. Default is `"_REVERSED"`.
+#'
+#' @return A data frame with the original data and additional columns for the
+#' refined FDR estimates:
+#' \describe{
+#'   \item{FDRn}{Normal FDR estimation as cumulative minimum (q-value).}
+#'   \item{FDRp}{Picked FDR estimation as cumulative minimum (q-value).}
+#'   \item{FDRr}{Refined FDR estimationas cumulative minimum (q-value).}
+#'   \item{to}{Target-only identifications count.}
+#'   \item{do}{Decoy-only identifications count.}
+#'   \item{td}{Count of identifications with the same target and decoy scores.}
+#'   \item{tb}{Target-best identifications count.}
+#'   \item{db}{Decoy-best identifications count.}
+#' }
+#'
+#' @examples
+#' # Example usage with a sample dataset
+#' sample_data <- data.frame(
+#'   proteinRef = c("P1", "P1_REVERSED", "P2", "P3", "P3_REVERSED"),
+#'   score = c(0.1, 0.2, 0.3, 0.5, 0.4),
+#'   isDecoy = c(FALSE, TRUE, FALSE, FALSE, TRUE)
+#' )
+#' refined_fdr(sample_data, levelRef = proteinRef, score = score, lower_better = TRUE)
+#'
+#' @seealso
+#' - [Protein Probability Model for High-Throughput Protein Identification by Mass Spectrometry-Based Proteomics](https://pubs.acs.org/doi/10.1021/acs.jproteome.9b00819) for more information on the refined FDR estimation.
+#'
+#' @export
 refined_fdr <- function(data, levelRef, score, lower_better = TRUE, affix = "_REVERSED") {
   competition <-
     data %>%
@@ -182,6 +230,49 @@ refined_fdr <- function(data, levelRef, score, lower_better = TRUE, affix = "_RE
     arrange_score({{score}}, lower_better)
 }
 
+#' LP Gamma (LPG) Metrics Calculation
+#'
+#' This function calculates various LP Gamma (LPG) metrics for a specified
+#' reference level, such as a protein, a gene or a protein group. The metrics are
+#' derived from the coLogarithm of Probability (LP) of their constituting peptides
+#' and include probabilities derived from maximum LP, sum of LP values, and
+#' filtered LP sums using a specified peptide-level FDR threshold.
+#'
+#' @param data A data frame containing identification data, including
+#' peptide-related columns for coLogarithm of Probability (`LP`), q-values
+#' (`qval`), and a logical column `isDecoy`.
+#' @param levelRef The column name of the reference level to group by, such as
+#' a protein or a gene identifier. This should be an unquoted column name.
+#' @param threshold A numeric value representing the FDR threshold for
+#' peptide-level q-values (default is `0.01`).
+#'
+#' @return A data frame containing the calculated LPG metrics:
+#' \describe{
+#'   \item{isDecoy}{Indicates whether the group contains any decoy identification.}
+#'   \item{n}{The total number of peptide identifications for the group.}
+#'   \item{m}{The number of peptide identifications with a q-value below the threshold.}
+#'   \item{LPM}{The maximum coLogarithm of Probability (`LP`) for the group.}
+#'   \item{LPS}{The sum of coLogarithm of Probability (`LP`) for the group.}
+#'   \item{LPF}{The sum of coLogarithm of Probability for identifications with a q-value below the threshold.}
+#'   \item{LPGM}{The LP Gamma value based on the maximum `LP`.}
+#'   \item{LPGS}{The LP Gamma value based on the sum of `LP` values.}
+#'   \item{LPGF}{The LP Gamma value based on the filtered sum of `LP` values for confident identifications.}
+#' }
+#'
+#' @examples
+#' # Example usage with a sample dataset
+#' sample_data <- data.frame(
+#'   levelRef = c("P1", "P1", "P2", "P2", "P3"),
+#'   LP = c(1.5, 2.0, 0.5, 1.0, 1.2),
+#'   qval = c(0.01, 0.02, 0.005, 0.03, 0.01),
+#'   isDecoy = c(FALSE, FALSE, TRUE, FALSE, FALSE)
+#' )
+#' lpg(sample_data, levelRef, threshold = 0.01)
+#'
+#' @seealso
+#' - [Protein Probability Model for High-Throughput Protein Identification by Mass Spectrometry-Based Proteomics](https://pubs.acs.org/doi/10.1021/acs.jproteome.9b00819) for more information on the LPG scores.
+#'
+#' @export
 lpg <- function(data, levelRef, threshold = 0.01) {
   data %>%
     group_by({{levelRef}}) %>%
@@ -197,9 +288,26 @@ lpg <- function(data, levelRef, threshold = 0.01) {
       LPGF = ifelse(m == 0, LPGM, colog((1 - pgamma(LPF*log(10),m)) * choose(n, m))),
       across(everything(), first),
       .groups = "drop"
-    )
+    ) %>%
+    select(-LP, -qval)
 }
 
+#' Plot Rank of Decoy Scores
+#'
+#' This function creates a rank plot of decoy scores based on various LP (coLogarithm
+#' of Probability) metrics, including LPM, LPS, LPF, and LPG scores (LPGM, LPGS, LPGF).
+#' The plot displays the ranked scores of decoys with a reference line for comparison.
+#'
+#' @param data A data frame containing identification data, including columns
+#' for decoy status (`isDecoy`) and any of the different LP metrics (LPM, LPS,
+#' LPF, LPGM, LPGS, LPGF).
+#'
+#' @return A ggplot object showing the rank plot of decoy scores for the different
+#' metrics. Each score type is displayed in a separate facet with the rank plotted
+#' on the x-axis and the score on the y-axis. The red diagonal line represents a
+#' reference for ideal ranking.
+#'
+#' @export
 plot_rank <- function(data) {
   decoys <-
     data %>%

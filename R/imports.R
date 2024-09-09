@@ -3,6 +3,7 @@
 #' @import mzR
 #' @import dplyr
 #' @import tidyr
+#' @import stringr
 #' @import ggplot2
 #' @import ggforce
 NULL
