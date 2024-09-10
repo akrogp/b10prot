@@ -26,11 +26,12 @@ add_class <- function(obj, new_class) {
 #' @seealso
 #' - [PAnalyzer: A software tool for protein inference in shotgun proteomics](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-13-288) for more information on the tool.
 panalyzer <- function(pep2prot) {
+  jar_path <- system.file("PAnalyzer.jar", package = "b10prot")
   tmp_input <- tempfile("pa_input_", fileext = ".tsv")
   tmp_output <- tempfile("pa_output_", fileext = ".tsv")
 
   write_delim(pep2prot, tmp_input, delim = "\t")
-  sprintf("java -jar PAnalyzer.jar %s peptideRef proteinRef %s", tmp_input, tmp_output) %>%
+  sprintf("java -jar %s %s peptideRef proteinRef %s", jar_path, tmp_input, tmp_output) %>%
     system()
   output <- read_delim(tmp_output, delim = "\t") %>%
     add_class("panalyzer")
@@ -84,6 +85,10 @@ summary.panalyzer <- function(panalyzer) {
 #'   groups to be visualized.
 #'
 #' @return A ggplot object visualizing the selected protein groups and their associated peptides.
+#'
+#' @examples
+#' data(example_panalyzer, package = "b10prot")
+#' plot_groups(example_panalyzer, groupRefs = 1:5)
 #'
 #' @seealso
 #' - [PAnalyzer: A software tool for protein inference in shotgun proteomics](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-13-288) for an example plot.

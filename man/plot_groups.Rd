@@ -22,6 +22,11 @@ The function filters the specified protein groups, arranges them, and displays a
 the peptides associated with each protein in the group. Peptides are colored according to
 their classification as unique, discriminating, non-discriminating, or non-significant.
 }
+\examples{
+data(example_panalyzer, package = "b10prot")
+plot_groups(example_panalyzer, groupRefs = 1:5)
+
+}
 \seealso{
 \itemize{
 \item \href{https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-13-288}{PAnalyzer: A software tool for protein inference in shotgun proteomics} for an example plot.
