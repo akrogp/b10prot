@@ -1,17 +1,19 @@
 # Utility functions for the different steps of a proteomics identification workflow
 
-load_psms <- function(mzid_file) {
-    sprintf("Loading %s...", mzid_file) %>%
-        print()
+load_psms <- function(mzid_file, verbose = TRUE) {
+    if( verbose )
+        sprintf("Loading %s...", mzid_file) %>%
+            print()
     data_mzid <-
         openIDfile(mzid_file)
-    mzidInfo(data_mzid) %>%
-        print()
+    if( verbose )
+        mzidInfo(data_mzid) %>%
+            print()
     data_psms <-
         data_mzid %>%
         psms() %>%
-        as_tibble() %>%
-        mutate(SpectraSource = basename(mzidInfo(data_mzid)$SpectraSource), .before = 1)
+        as_tibble()
+        #mutate(SpectraSource = basename(mzidInfo(data_mzid)$SpectraSource), .before = 1)
     data_scores <-
         data_mzid %>%
         score() %>%
@@ -36,18 +38,18 @@ load_psms <- function(mzid_file) {
 #'   (`psmScore`) and the protein reference (`proteinRef`).
 #'
 #' @export
-wf_load_psms <- function(path = ".", pattern = ".mzid", psm_score = NULL) {
+wf_load_psms <- function(path = ".", pattern = ".mzid", psm_score = NULL, verbose = FALSE) {
     psms <-
         # Find files with PSMs
         list.files(path, pattern, full.names = TRUE) %>%
         # Loads PSMs from each single file
-        map(load_psms) %>%
+        map(~ load_psms(.x, verbose = verbose)) %>%
         # Concatenate PSMs from different files (eg. fractions)
         bind_rows() %>%
         # Create a standard column for the psm score
         mutate(psmScore =
-                   if(is.null(psm_score)) .data[[last(colnames(.))]]
-               else .data[[psm_score]]
+            if(is.null(psm_score)) .data[[last(colnames(.))]]
+            else .data[[psm_score]]
         ) %>%
         # Create a standard column with the protein reference
         mutate(proteinRef = DatabaseAccess)
