@@ -1,0 +1,19 @@
+---
+title: "b10prot"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{b10prot}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(b10prot)
+```
