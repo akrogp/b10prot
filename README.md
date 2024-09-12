@@ -44,17 +44,15 @@ data in a “tidy” format, following principles similar to those of the
 
 The b10prot package includes a set of functions (with the `iwf_` prefix)
 specifically designed to streamline the protein identification workflow.
-These functions are designed to work with data in a “tidy” format,
-following principles similar to those of the `tidyverse`. This means
-that the data should be organized in a way that each type of observation
-is stored in its own column and each row represents a single
-observation.
+These functions are designed to work with data in a “tidy” format, so it
+should be organized in a way that each type of observation is stored in
+its own column and each row represents a single observation.
 
 This workflow is based on two main types of data:
 
 - **Identification Lists** containing a list of identifications with
   their scores:
-  - `iwf_load_psms` load PSMs from mzIdentML files.
+  - `iwf_load_psms` loads PSMs from mzIdentML files.
   - `iwf_psm2pep` aggregates PSMs into peptides.
   - `lpg` collapses relationships into a list of identifications
     including LPG scores.
