@@ -22,9 +22,9 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 <!-- badges: end -->
 
-b10prot is an R package designed for the analysis of proteomics data, specifically focusing on protein identification. Developed as part of the [EhuB10](https://ehubio.ehu.eus/) initiative, a collaborative effort between several research groups from the University of the Basque Country (UPV/EHU), the package offers a suite of tools tailored to meet the needs of bioinformatics and proteomics researchers.
+b10prot is an R package designed for the analysis of proteomics data, specifically focusing on protein identification. It is developed as part of the [EhuB10](https://ehubio.ehu.eus/) initiative, a collaborative effort between several research groups from the University of the Basque Country (UPV/EHU). The name b10prot is a reference to bioinformatics and proteomics, with "b10" representing "bio" in a way that reflects both biology and binary code.
 
-The name b10prot is a reference to bioinformatics and proteomics, with "b10" representing "bio" in a way that reflects both biology and binary code. This package is built with the aim of simplifying and optimizing proteomics data analysis workflows, enabling researchers to efficiently process and interpret protein identification results.
+This package is built with the aim of simplifying the integration of our latest research into proteomics data analysis workflows. It works with data in a "tidy" format, following principles similar to those of the `tidyverse`.
 
 ## Key Features
 
