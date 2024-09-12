@@ -38,7 +38,7 @@ load_psms <- function(mzid_file, verbose = TRUE) {
 #'   (`psmScore`) and the protein reference (`proteinRef`).
 #'
 #' @export
-wf_load_psms <- function(path = ".", pattern = ".mzid", psm_score = NULL, verbose = FALSE) {
+iwf_load_psms <- function(path = ".", pattern = ".mzid", psm_score = NULL, verbose = FALSE) {
     psms <-
         # Find files with PSMs
         list.files(path, pattern, full.names = TRUE) %>%
@@ -69,10 +69,10 @@ wf_load_psms <- function(path = ".", pattern = ".mzid", psm_score = NULL, verbos
 #' \item{`pepScore`}{The best score for the peptide.}
 #' \item{`isDecoy`}{A logical indicating whether the peptide belongs to the decoy set.}
 #'
-#' @seealso [wf_load_psms] for loading PSMs.
+#' @seealso [iwf_load_psms] for loading PSMs.
 #'
 #' @export
-wf_psm2pep <- function(psms, lower_better = TRUE) {
+iwf_psm2pep <- function(psms, lower_better = TRUE) {
     psms %>%
         # peptideRef is the primary key and will be unique in the list
         group_by(peptideRef) %>%
@@ -105,7 +105,7 @@ wf_psm2pep <- function(psms, lower_better = TRUE) {
 #' \item{`shared`}{The number of reference entities matched by each peptide.}
 #'
 #' @export
-wf_pep2level <- function(psms, levelRef) {
+iwf_pep2level <- function(psms, levelRef) {
     psms %>%
         # We obtain a list of peptide-to-protein relations from PSMs
         group_by(peptideRef, {{levelRef}}) %>%
@@ -134,9 +134,9 @@ wf_pep2level <- function(psms, levelRef) {
 #'   - `groupRef`: Group identifier for the proteins.
 #'   - `shared`: The number of groups matched by each peptide.
 #'
-#' @seealso \code{\link{panalyzer}} for protein grouping, \code{\link{wf_pep2level}} for obtaining peptide-to-protein relations.
+#' @seealso \code{\link{panalyzer}} for protein grouping, \code{\link{iwf_pep2level}} for obtaining peptide-to-protein relations.
 #' @export
-wf_grouping <- function(pep2prot, threshold = 0.01) {
+iwf_grouping <- function(pep2prot, threshold = 0.01) {
     pa_ok <-
         pep2prot %>%
         # Builg groups using only peptides passing the FDR threshold
@@ -186,10 +186,10 @@ wf_grouping <- function(pep2prot, threshold = 0.01) {
 #'   - `proteinRefs`: A concatenation of all protein references in the group.
 #'   - `proteinMaster`: The first protein of the group.
 #'
-#' @seealso \code{\link{wf_grouping}} for generating peptide-to-protein-to-group relations,
+#' @seealso \code{\link{iwf_grouping}} for generating peptide-to-protein-to-group relations,
 #'   and \code{\link{panalyzer}} for protein grouping.
 #' @export
-wf_pep2group <- function(pep2prot2group) {
+iwf_pep2group <- function(pep2prot2group) {
     pep2prot2group %>%
         group_by(proteinRef) %>%
         mutate(
