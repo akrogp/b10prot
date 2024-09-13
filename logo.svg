@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="4.39cm" height="5.08cm" viewBox="0 0 439 508">
+  <polygon points="219.5,0 439,127 439,381 219.5,508 0,381 0,127" 
+           style="fill:white;stroke:#46b7b7;stroke-width:10"/>
+
+  <text x="50%" y="50%" font-family="Ubuntu Mono" font-size="64" font-weight="bold" text-anchor="middle" fill="black" dy=".35em">    
+    <tspan fill="#46b7b7">-=]</tspan>
+    <tspan fill="#ff5400">b10</tspan>
+    <tspan fill="#46b7b7">prot[=-</tspan>    
+  </text>
+</svg>

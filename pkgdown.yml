@@ -1,0 +1,10 @@
+pandoc: 3.1.11
+pkgdown: 2.0.7
+pkgdown_sha: ~
+articles:
+  b10prot: b10prot.html
+last_built: 2024-09-13T12:39Z
+urls:
+  reference: https://akrogp.github.io/b10prot/reference
+  article: https://akrogp.github.io/b10prot/articles
+
