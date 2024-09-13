@@ -1,0 +1,44 @@
+flowchart TD
+    Raw[(Raw MS/MS Data)] -->|Preprocessing| Search[Search Engine]
+    Target[(Target Fasta)] --> Search
+    Decoy[(Decoy Fasta)] --> Search
+    Target -->|Pseudoreverse| Decoy
+    Search -->|Similarity to theoretical spectra| PSMs[(PSMs)]
+    PSMs -->|rank=1, best PSM per peptide| Peptides[(Peptides)]
+    Peptides --> TDA[Target-decoy approach]
+    TDA --> LP[(Scored Peptides)]
+
+    LP --> PAnalyzer
+    PAnalyzer --> Groups[(Protein Groups)]
+    LP --> LPG[LPGF]
+    Groups --> LPG
+    LPG --> GScores[(Scored Groups)]
+    GScores --> FDRG[Refined FDR]
+    FDRG -->|Refined FDR <= 1%| IDG[(Group Identifications)]
+
+    LP --> LPQ[LPGF]
+    LPQ --> QScores[(Scored Proteins)]
+    QScores --> FDRQ[Refined FDR]
+    FDRQ -->|Refined FDR <= 1%| IDQ[(Protein Identifications)]
+
+    subgraph "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>b10prot Identification Workflows</b>"
+        PSMs
+        Peptides
+        TDA
+        LP
+        subgraph "<b>Protein Groups</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+            PAnalyzer
+            Groups
+            LPG
+            GScores
+            FDRG
+            IDG
+        end
+        subgraph "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Proteins</b>"
+            LPQ
+            QScores
+            FDRQ
+            IDQ
+        end
+    end
+

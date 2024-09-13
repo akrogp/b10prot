@@ -26,8 +26,8 @@ affiliation:
   - num: 4
     address: Cardiovascular Proteomics Laboratory, Centro Nacional de Investigaciones Cardiovasculares Carlos III (CNIC) and CIBER de Enfermedades Cardiovasculares
 main_findings:
-  - "Improved **shotgun proteomics** identifications with **b10prot** R package."
-  - "Create **tidy**verse-style workflows."
+  - "Improve **shotgun proteomics** identifications with **b10prot** R package."
+  - "Create **tidy**verse-style **workflows**."
 logoleft_name: https&#58;//akrogp.github.io/b10prot/logo.svg
 logoright_name: https&#58;//raw.githubusercontent.com/akrogp/b10prot/main/posters/SEBiBC-2024/EHU.svg
 logocenter_name: https&#58;//raw.githubusercontent.com/brentthorne/posterdown/master/images/qr-code-black.png
@@ -36,7 +36,9 @@ output:
     self_contained: false
     pandoc_args: --mathjax
     number_sections: false
-bibliography: packages.bib
+bibliography:
+    - packages.bib
+    - b10prot.bib
 link-citations: true
 ---
 
@@ -53,23 +55,27 @@ knitr::opts_chunk$set(echo = FALSE,
                       fig.align = 'center',
                       out.width = "100%")
 options(knitr.table.format = "html") 
+
+library(DiagrammeR)
 ```
 
-# Introduction
+# Motivation
 
-This is the `posterdown_betterport` template for the {posterdown} package! I was inspired by the twitter thread of [Mike Morrison](https://mobile.twitter.com/mikemorrison/status/1110191245035479041) and wanted to apply the `#betterposter` concept to the reproducible (yet simple to use) functionality of the {posterdown} package [@R-posterdown]. If you're not an R user don't sweat as you do **NOT** need to use it at all! Feel free to use only the Markdown functionality of this package :)
+- **Shotgun proteomics**: Preferred method for large-scale protein identification.
+- **Challenge**: Need for robust statistical methods to automate identification and reduce false positives.
+- **Our contribution**:
+    - Adapted our existing protein inference and scoring tools (PAnalyzer, LPGF, FDRr).
+    - Integrated seamlessly with shotgun proteomics workflows using R.
+- **Goal**: Make these tools more accessible to a wider scientific audience via R.
 
 ```{r, include=FALSE}
 knitr::write_bib(c('posterdown', 'rmarkdown','pagedown'), 'packages.bib')
 ```
 
-## Objectives
+# Approach
 
-1. Pick a template layout.
-2. Write/ create your poster content distraction free.
-3. Let posterdown do its thing!
+![](workflow.png){width=100%}
 
-# Methods
 
 I will show here how to include poster elements that may be useful, such as an equation using mathjax:
 
