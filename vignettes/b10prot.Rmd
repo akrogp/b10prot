@@ -1,19 +1,256 @@
 ---
 title: "b10prot"
-output: rmarkdown::html_vignette
+output:
+    rmarkdown::html_vignette:
+        toc: true
 vignette: >
   %\VignetteIndexEntry{b10prot}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, include = FALSE}
+```{r setup, include = FALSE}
+DATA_PATH <- "/home/gorka/MyProjects/EhuBio/Projects/R/b10prot/data-dev/"
+PSMS_PATH <- paste0(DATA_PATH, "psms.RData")
+is_devel <- file.exists(DATA_PATH)
+is_cache <- file.exists(PSMS_PATH)
+is_recache <- is_devel & !is_cache
+
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  error = TRUE,
+  eval = is_devel
 )
 ```
 
-```{r setup}
+## Introduction
+
+This vignette shows how to build different proteomics identification workflows using the `b10prot` package. 
+
+```{r}
+library(conflicted)
+library(dplyr)
+library(tidyr)
+library(stringr)
 library(b10prot)
+
+conflicts_prefer(dplyr::filter)
 ```
+
+## Loading PSMs
+
+The initial input to the identification workflows presented here consists on a list of Peptide-to-Spectrum Matches (PSMs) that must have been previously generated using any search engine. This list of PSMs must be available in a `data.frame` with, at least, the following columns:
+
+- `psmScore`
+- `rank`
+- `isDecoy`
+- `peptideRef`
+- `proteinRef`
+- `geneRef` (optional)
+
+We provide a `iwf_load_psms` function for facilitating obtaining these PSMs from one or more [mzIdentML](https://www.psidev.info/mzidentml) (*.mzid) files, which is a file format standardized by the [HUPO Proteomics Standards Initiative](https://www.psidev.info/). To parse these mzid file we depend on the `mzR` package.
+
+We will use as an example dataset three mzid files obtained after searching three fractions of one tissue from this [draft map of the human proteome](https://www.ebi.ac.uk/pride/archive/projects/PXD000561). For this search we have used the [MSGF+ Search Engine](https://msgfplus.github.io/) within [SearchGUI](https://compomics.github.io/projects/searchgui) 
+
+```{r eval=is_cache, include=FALSE}
+load(PSMS_PATH)
+```
+
+```{r eval=is_recache}
+psms <- 
+  # Load PSMs from mzIdentML files
+  iwf_load_psms(
+    path = paste0(DATA_PATH, "msgf"),
+    # We will use MS-GF+ spectral E-value for the target-decoy approach
+    psm_score = "MS.GF.SpecEValue") %>%
+  # Extract UniProt accession for convenience (optional)
+  mutate(proteinRef = str_split_i(DatabaseAccess, "\\|", 2)) %>%
+  # Decoy information was not specified in my mzid files
+  mutate(isDecoy = str_detect(proteinRef, "_REVERSED")) %>%
+  # Extract UniProt gene name (only if you are interested in this level)
+  mutate(geneRef = str_extract(DatabaseDescription, "GN=\\S+")) %>%
+  mutate(geneRef = str_sub(geneRef, 4)) %>% 
+  mutate(geneRef = ifelse(isDecoy, paste0(geneRef, "_REVERSED"), geneRef)) %>% 
+  # Only best PSM per spectrum
+  filter(rank == 1)
+```
+
+```{r eval=is_recache, include=FALSE}
+save(psms, file = PSMS_PATH)
+```
+
+```{r}
+psms %>% glimpse()
+```
+
+## Peptide identifications
+
+From the list of PSMs we obtain a list of peptides by selecting the best PSM per peptide and then we calculate peptide confidence scores using the target-decoy approach:
+
+```{r}
+peptides <- 
+  psms %>%
+  # Best PSM per peptide
+  iwf_psm2pep(lower_better = TRUE) %>% 
+  # Calculate target-decoy approach metrics
+  target_decoy_approach(pepScore)
+
+peptides %>% glimpse()
+```
+
+If we are just interested in the peptides, we can obtain the identified peptides by setting a peptide-level FDR threshold:
+
+
+```{r}
+peptides %>% 
+    filter(qval <= 0.01) %>% 
+    global_fdr()
+```
+
+## Protein identifications
+
+To obtain a list of protein identifications we compute a protein-level score using the score of the corresponding peptides and then apply a protein-level FDR. We use LPGF as the protein-level score using only unique peptides, i.e. peptides not shared by different proteins.
+
+First of all, we need a `data.framne` of peptide-to-protein relations including the peptide-level scores from the previous section. We obtain the peptide-to-protein relations from the initial PSMs and then we merge the peptide-level scores from the peptide list:
+
+```{r}
+pep2prot <- 
+  # Peptide-to-protein relations
+  iwf_pep2level(psms, levelRef = proteinRef) %>% 
+  # Include peptide scores
+  inner_join(peptides, by = join_by(peptideRef))
+
+pep2prot %>% glimpse()
+```
+
+Now we can collapse these relationships into a list of protein identifications with protein-level scores:
+
+```{r}
+proteins <- 
+  pep2prot %>% 
+  # Only consider unique (i.e. not shared) peptides
+  filter(shared==1) %>% 
+  # Calculate protein-level scores
+  lpg(proteinRef) %>% 
+  # Calculate target-decoy approach metrics using the LPGF score
+  target_decoy_approach(LPGF, lower_better = FALSE)
+
+proteins %>% glimpse()
+```
+
+And check whether the protein-level score distribution in the decoy proteins follows an uniform distribution. We can see that the LPG scores perform as expected:
+
+```{r fig.width=7, fig.height=4}
+proteins %>% 
+  plot_rank()
+```
+
+Finally, we can obtain the identified proteins using a protein-level FDR threshold:
+
+```{r}
+proteins %>% 
+  filter(qval <= 0.01) %>% 
+  global_fdr()
+```
+
+## Gene identifications
+
+Since in the previous section we have used only unique peptides, protein isoforms from the same gene that share the same peptide sequences would have been removed. To minimize the effect of this simplification, we will now consider
+peptides that are unique at the gene level. The steps are equivalent to the ones used in the protein identification workflow:
+
+First of all, we need a `data.framne` of peptide-to-gene relations including the peptide-level scores from the previous section. Once again, we obtain the peptide-to-gene relations from the initial PSMs and then we merge the peptide-level scores from the peptide list:
+
+```{r}
+pep2gene <- 
+  # Peptide-to-gene relations
+  iwf_pep2level(psms, levelRef = geneRef) %>% 
+  # Include peptide scores
+  inner_join(peptides, by = join_by(peptideRef))
+
+pep2gene %>% glimpse()
+```
+
+Now we can collapse these relationships into a list of gene identifications with gene-level scores:
+
+```{r}
+genes <- 
+  pep2gene %>% 
+  # Only consider unique (i.e. not shared) peptides
+  filter(shared==1) %>% 
+  # Calculate gene-level scores
+  lpg(geneRef) %>% 
+  # Calculate target-decoy approach metrics using the LPGF score
+  target_decoy_approach(LPGF, lower_better = FALSE)
+
+genes %>% glimpse()
+```
+
+And check whether the gene-level score distribution in the decoy genes follows an uniform distribution. We can see that the LPG scores perform as expected:
+
+```{r fig.width=7, fig.height=4}
+genes %>% 
+  plot_rank()
+```
+
+Finally, we can obtain the identified genes using a gene-level FDR threshold:
+
+```{r}
+genes %>% 
+  filter(qval <= 0.01) %>% 
+  global_fdr()
+```
+
+## Protein groups
+
+Although working at the gene level reduces the number of peptide sequences shared, we would be still removing other peptides whose sequences are shared between proteins of different genes. To avoid this problem, we can build groups of proteins sharing peptide sequences and report a list of proteins groups passing a protein group-level FDR.
+
+To build this protein groups we use the PAnalyzer algorithm. An example is included with this package:
+
+```{r fig.width=7, fig.height=4}
+data(example_panalyzer, package = "b10prot")
+plot_groups(example_panalyzer, groupRefs = 1:5)
+```
+
+PAnalyzer receives as input a `data.frame` with peptide-to-protein relations an returns another `data.frame` including peptide-to-protein-to-group relations along with the corresponding peptide and protein types:
+
+```{r}
+pep2prot2group <- 
+  pep2prot %>% 
+  iwf_grouping()
+
+pep2prot2group %>% 
+  summary()
+```
+
+From these relations we can obtain the list of protein groups identifications with their corresponding scores:
+
+```{r}
+groups <- 
+  pep2prot2group %>% 
+  # Instead of iwf_pep2level() we use iwf_pep2group() to retain the list of proteins within each group
+  iwf_pep2group() %>% 
+  # Only consider peptides unique to one group (this also removes non-conclusice proteins) 
+  filter(shared==1) %>% 
+  # Calculate protein group-level scores
+  lpg(groupRef) %>% 
+  # Calculate target-decoy approach metrics using the LPGF score
+  target_decoy_approach(LPGF, lower_better = FALSE)
+
+groups %>% filter(m>1) %>% glimpse()
+```
+In a equivalent way to the protein or gene identification workflow, we can test the score distribution of the decoy protein groups:
+
+```{r fig.width=7, fig.height=4}
+groups %>% 
+  plot_rank()
+```
+
+An also report a list of groups passing a protein group-level FDR threshold:
+
+```{r}
+groups %>% 
+  filter(qval <= 0.01) %>% 
+  global_fdr()
+```
+

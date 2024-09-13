@@ -39,6 +39,8 @@ load_psms <- function(mzid_file, verbose = TRUE) {
 #'
 #' @export
 iwf_load_psms <- function(path = ".", pattern = ".mzid", psm_score = NULL, verbose = FALSE) {
+    if( !file.exists(path) )
+        stop("Path not found")
     psms <-
         # Find files with PSMs
         list.files(path, pattern, full.names = TRUE) %>%
@@ -144,7 +146,7 @@ iwf_grouping <- function(pep2prot, threshold = 0.01) {
         # Filter unnecessary information
         select(peptideRef, proteinRef, isDecoy) %>%
         panalyzer() %>%
-        right_join(pep2prot) %>%
+        right_join(pep2prot, by = join_by(peptideRef, proteinRef, isDecoy)) %>%
         # Fill missing protein-related fields in peptide-to-protein relations not used for building the groups
         group_by(proteinRef) %>%
         mutate(across(c(proteinType, groupRef), ~ first(na.omit(.x)))) %>%
@@ -161,7 +163,7 @@ iwf_grouping <- function(pep2prot, threshold = 0.01) {
         filter(!peptideRef %in% pa_ok$peptideRef) %>%
         select(peptideRef, proteinRef, isDecoy) %>%
         panalyzer() %>%
-        inner_join(pep2prot) %>%
+        inner_join(pep2prot, by = join_by(peptideRef, proteinRef, isDecoy)) %>%
         group_by(peptideRef) %>%
         mutate(shared = n_distinct(groupRef)) %>%
         ungroup() %>%

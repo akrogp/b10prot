@@ -33,7 +33,7 @@ panalyzer <- function(pep2prot) {
   write_delim(pep2prot, tmp_input, delim = "\t")
   sprintf("java -jar %s %s peptideRef proteinRef %s", jar_path, tmp_input, tmp_output) %>%
     system()
-  output <- read_delim(tmp_output, delim = "\t") %>%
+  output <- read_delim(tmp_output, delim = "\t", show_col_types = FALSE) %>%
     add_class("panalyzer")
 
   file.remove(tmp_input)
