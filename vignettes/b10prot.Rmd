@@ -28,7 +28,7 @@ knitr::opts_chunk$set(
 
 This vignette shows how to build different proteomics identification workflows using the `b10prot` package. 
 
-```{r}
+```{r message=FALSE}
 library(conflicted)
 library(dplyr)
 library(tidyr)
@@ -266,7 +266,7 @@ refined_genes <-
   refined_fdr(geneRef, LPGF, lower_better = FALSE, affix = "_REVERSED")
 
 refined_genes %>% 
-  select(geneRef, sDecoy, LPGF, FDRn, FDRp, FDRr, to, do, td, tb, db) %>% 
+  select(geneRef, isDecoy, LPGF, FDRn, FDRp, FDRr, to, do, td, tb, db) %>% 
   glimpse()
 ```
 
