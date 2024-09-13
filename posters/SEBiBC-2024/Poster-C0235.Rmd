@@ -29,7 +29,7 @@ main_findings:
   - "Improved **shotgun proteomics** identifications with **b10prot** R package."
   - "Create **tidy**verse-style workflows."
 logoleft_name: https&#58;//akrogp.github.io/b10prot/logo.svg
-logoright_name: https&#58;//upload.wikimedia.org/wikipedia/en/c/c8/Euskal_Herriko_Unibertsitatea_%28logo%29.svg
+logoright_name: https&#58;//raw.githubusercontent.com/akrogp/b10prot/main/posters/SEBiBC-2024/EHU.svg
 logocenter_name: https&#58;//raw.githubusercontent.com/brentthorne/posterdown/master/images/qr-code-black.png
 output: 
   posterdown::posterdown_betterport:
