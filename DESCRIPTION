@@ -19,3 +19,4 @@ Suggests:
     knitr,
     rmarkdown
 VignetteBuilder: knitr
+URL: https://akrogp.github.io/b10prot/
