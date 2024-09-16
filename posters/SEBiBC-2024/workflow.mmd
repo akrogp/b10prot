@@ -10,20 +10,20 @@ flowchart TD
         Peptides --> TDA[Target-decoy approach]
         TDA --> LP[(Scored Peptides)]
         LP --> PAnalyzer
-        LP -->|unique to protein| LPQ[LPGF]
+        LP -->|unique to gene| LPQ[LPGF]
         LP -->|unique to group| LPG[LPGF]
 
         subgraph "<b>Protein Groups</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
             PAnalyzer --> Groups[(Protein Groups)]
             Groups --> LPG
             LPG --> GScores[(Scored Groups)]
-            GScores --> FDRG[Refined FDR]
-            FDRG -->|Refined FDR <= 1%| IDG[(Group Identifications)]
+            GScores --> FDRG[Target-decoy approach]
+            FDRG -->|Normal FDR <= 1%| IDG[(Group Identifications)]
         end
 
-        subgraph "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Proteins</b>"
-            LPQ --> QScores[(Scored Proteins)]
+        subgraph "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Genes</b>"
+            LPQ --> QScores[(Scored Genes)]
             QScores --> FDRQ[Refined FDR]
-            FDRQ -->|Refined FDR <= 1%| IDQ[(Protein Identifications)]
+            FDRQ -->|Refined FDR <= 1%| IDQ[(Gene Identifications)]
         end
     end
