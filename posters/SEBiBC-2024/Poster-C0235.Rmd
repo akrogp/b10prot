@@ -90,21 +90,21 @@ FDR_PATH <- "fdr_counts.RData"
 - For upper level (eg. protein) scores we will use:
     - Peptide-level `LP` = cologaritm of p-value
 
-## Proteins (or Genes)
+## Proteins/Genes
 
-- Consider only peptides **unique** to one protein
+- Consider only peptides **unique** to one protein/gene
 - Calculate **LPGF** score [@prieto2020] from:
     - `LP` peptide scores
     - `n` number of matched peptides
     - `m` number of identified peptides
-- Protein-level **refined FDR** [@prieto2020] using LPGF score
+- Protein/Gene-level **refined FDR** [@prieto2020] using LPGF score
 
 ## Protein Groups
 
 - Construct protein groups using **PAnalyzer** [@prieto2012]
 - Consider only peptides **unique** to one group
 - Calculate group-level **LPGF** score
-- Group-level **refined FDR** using LPGF score
+- **Group-level FDR** using LPGF score
 
 ![](workflow.png){width=100%}
 
