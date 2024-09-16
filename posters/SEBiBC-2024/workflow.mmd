@@ -4,41 +4,26 @@ flowchart TD
     Decoy[(Decoy Fasta)] --> Search
     Target -->|Pseudoreverse| Decoy
     Search -->|Similarity to theoretical spectra| PSMs[(PSMs)]
-    PSMs -->|rank=1, best PSM per peptide| Peptides[(Peptides)]
-    Peptides --> TDA[Target-decoy approach]
-    TDA --> LP[(Scored Peptides)]
 
-    LP --> PAnalyzer
-    PAnalyzer --> Groups[(Protein Groups)]
-    LP --> LPG[LPGF]
-    Groups --> LPG
-    LPG --> GScores[(Scored Groups)]
-    GScores --> FDRG[Refined FDR]
-    FDRG -->|Refined FDR <= 1%| IDG[(Group Identifications)]
+    subgraph "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>b10prot Identification Workflows</b>"
+        PSMs -->|rank=1, best PSM per peptide| Peptides[(Peptides)]
+        Peptides --> TDA[Target-decoy approach]
+        TDA --> LP[(Scored Peptides)]
+        LP --> PAnalyzer
+        LP -->|unique to protein| LPQ[LPGF]
+        LP -->|unique to group| LPG[LPGF]
 
-    LP --> LPQ[LPGF]
-    LPQ --> QScores[(Scored Proteins)]
-    QScores --> FDRQ[Refined FDR]
-    FDRQ -->|Refined FDR <= 1%| IDQ[(Protein Identifications)]
-
-    subgraph "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>b10prot Identification Workflows</b>"
-        PSMs
-        Peptides
-        TDA
-        LP
         subgraph "<b>Protein Groups</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
-            PAnalyzer
-            Groups
-            LPG
-            GScores
-            FDRG
-            IDG
+            PAnalyzer --> Groups[(Protein Groups)]
+            Groups --> LPG
+            LPG --> GScores[(Scored Groups)]
+            GScores --> FDRG[Refined FDR]
+            FDRG -->|Refined FDR <= 1%| IDG[(Group Identifications)]
         end
+
         subgraph "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Proteins</b>"
-            LPQ
-            QScores
-            FDRQ
-            IDQ
+            LPQ --> QScores[(Scored Proteins)]
+            QScores --> FDRQ[Refined FDR]
+            FDRQ -->|Refined FDR <= 1%| IDQ[(Protein Identifications)]
         end
     end
-
