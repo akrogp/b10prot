@@ -33,6 +33,7 @@ load_psms <- function(mzid_file, verbose = TRUE) {
 #'   which targets mzIdentML files.
 #' @param psm_score An optional character string specifying the column name to be used as the PSM score.
 #'   If `NULL`, the last column in the loaded data will be used as the PSM score.
+#' @param verbose Logical, whether to print progress messages (default TRUE).
 #'
 #' @return A `data.frame` containing the combined PSM data, with added columns for the PSM score
 #'   (`psmScore`) and the protein reference (`proteinRef`).
@@ -142,7 +143,7 @@ iwf_grouping <- function(pep2prot, threshold = 0.01) {
     pa_ok <-
         pep2prot %>%
         # Builg groups using only peptides passing the FDR threshold
-        filter(qval <= 0.01) %>%
+        filter(qval <= threshold) %>%
         # Filter unnecessary information
         select(peptideRef, proteinRef, isDecoy) %>%
         panalyzer() %>%
@@ -206,5 +207,6 @@ iwf_pep2group <- function(pep2prot2group) {
         mutate(proteinMaster = first(proteinRef)) %>%
         ungroup() %>%
         group_by(peptideRef, groupRef) %>%
-        summarise(across(everything(), first), .groups = "drop")
+        summarise(across(everything(), first), .groups = "drop") %>%
+        select(-proteinRef)
 }

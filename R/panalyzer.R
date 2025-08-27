@@ -49,12 +49,13 @@ panalyzer <- function(pep2prot) {
 #' includes the number of distinct proteins and protein groups for both target
 #' and decoy entries.
 #'
-#' @param panalyzer A data frame containing the results from the `panalyzer` function.
+#' @param object A data frame containing the results from the `panalyzer` function.
 #'   This data frame must contain the following columns:
 #'   - `isDecoy`: Logical indicator of whether the protein is a decoy (`TRUE`) or a target (`FALSE`).
 #'   - `proteinType`: The type of protein as classified by PAnalyzer (e.g., `"conclusive"`, `"indistinguishable"`, `"ambiguous"`, `"non-conclusive"`).
 #'   - `proteinRef`: Protein reference identifier.
 #'   - `groupRef`: Protein group reference.
+#' @param ... Additional arguments (currently ignored).
 #'
 #' @return A data frame summarizing the PAnalyzer results with the following columns:
 #'   - `Type`: The type of protein (`"conclusive"`, `"indistinguishable"`, `"ambiguous"`, `"non-conclusive"`).
@@ -64,7 +65,8 @@ panalyzer <- function(pep2prot) {
 #'   - `DecoyGroups`: The number of decoy protein groups of the given type.
 #'
 #' @export
-summary.panalyzer <- function(panalyzer) {
+summary.panalyzer <- function(object, ...) {
+  # stopifnot(inherits(object, "panalyzer"))
   panalyzer %>%
     group_by(isDecoy, proteinType) %>%
     summarise(proteins = n_distinct(proteinRef), groups = n_distinct(groupRef), .groups = "drop") %>%

@@ -1,4 +1,7 @@
-#' Imports of functions used across the whole package
+#' Package-level imports
+#'
+#' @name b10prot-package
+#' @keywords internal
 #' @import conflicted
 #' @import readr
 #' @import mzR

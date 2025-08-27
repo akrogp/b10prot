@@ -15,6 +15,8 @@ which targets mzIdentML files.}
 
 \item{psm_score}{An optional character string specifying the column name to be used as the PSM score.
 If \code{NULL}, the last column in the loaded data will be used as the PSM score.}
+
+\item{verbose}{Logical, whether to print progress messages (default TRUE).}
 }
 \value{
 A \code{data.frame} containing the combined PSM data, with added columns for the PSM score

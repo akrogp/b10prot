@@ -10,13 +10,26 @@ Description: A package for processing shotgun proteomics data to identify and
     controlled using various FDR estimations based on the target-decoy approach 
     and LPGF identification scores. Protein groups are formed using the 
     PAnalyzer algorithm.
-License: `use_gpl3_license()`
+License: GPL-3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 SystemRequirements: Java (>= 11)
+Depends: 
+    R (>= 4.0)
+Imports: 
+    conflicted,
+    readr,
+    mzR,
+    dplyr,
+    tidyr,
+    stringr,
+    purrr,
+    ggplot2,
+    ggforce
 Suggests: 
     knitr,
     rmarkdown
 VignetteBuilder: knitr
 URL: https://akrogp.github.io/b10prot/
+LazyData: true

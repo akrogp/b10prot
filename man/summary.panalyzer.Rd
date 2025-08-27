@@ -4,10 +4,10 @@
 \alias{summary.panalyzer}
 \title{Summarize PAnalyzer Results}
 \usage{
-\method{summary}{panalyzer}(panalyzer)
+\method{summary}{panalyzer}(object, ...)
 }
 \arguments{
-\item{panalyzer}{A data frame containing the results from the \code{panalyzer} function.
+\item{object}{A data frame containing the results from the \code{panalyzer} function.
 This data frame must contain the following columns:
 \itemize{
 \item \code{isDecoy}: Logical indicator of whether the protein is a decoy (\code{TRUE}) or a target (\code{FALSE}).
@@ -15,6 +15,8 @@ This data frame must contain the following columns:
 \item \code{proteinRef}: Protein reference identifier.
 \item \code{groupRef}: Protein group reference.
 }}
+
+\item{...}{Additional arguments (currently ignored).}
 }
 \value{
 A data frame summarizing the PAnalyzer results with the following columns:

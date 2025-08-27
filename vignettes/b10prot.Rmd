@@ -227,7 +227,9 @@ groups <-
   pep2prot2group %>% 
   # Instead of iwf_pep2level() we use iwf_pep2group() to retain the list of proteins within each group
   iwf_pep2group() %>% 
-  # Only consider peptides unique to one group (this also removes non-conclusice proteins) 
+  # Discard non-conclusive proteins
+  filter(proteinType != "non-conclusive") %>% 
+  # Only consider peptides unique to one group
   filter(shared==1) %>% 
   # Calculate protein group-level scores
   lpg(groupRef) %>% 
