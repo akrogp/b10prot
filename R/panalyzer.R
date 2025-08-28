@@ -66,8 +66,8 @@ panalyzer <- function(pep2prot) {
 #'
 #' @export
 summary.panalyzer <- function(object, ...) {
-  # stopifnot(inherits(object, "panalyzer"))
-  panalyzer %>%
+  stopifnot(inherits(object, "panalyzer"))
+  object %>%
     group_by(isDecoy, proteinType) %>%
     summarise(proteins = n_distinct(proteinRef), groups = n_distinct(groupRef), .groups = "drop") %>%
     pivot_wider(names_from = isDecoy, values_from = c(proteins, groups)) %>%
