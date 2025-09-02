@@ -50,7 +50,7 @@ filtered LP sums using a specified peptide-level FDR threshold.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">lpg</span><span class="op">(</span><span class="va">data</span>, <span class="va">levelRef</span>, threshold <span class="op">=</span> <span class="fl">0.01</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">lpg</span><span class="op">(</span><span class="va">data</span>, <span class="va">levelRef</span>, threshold <span class="op">=</span> <span class="fl">0.01</span>, extra_cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -72,10 +72,16 @@ a protein or a gene identifier. This should be an unquoted column name.</p></dd>
 <dd><p>A numeric value representing the FDR threshold for
 peptide-level q-values (default is <code>0.01</code>).</p></dd>
 
+
+<dt id="arg-extra-cols">extra_cols<a class="anchor" aria-label="anchor" href="#arg-extra-cols"></a></dt>
+<dd><p>A character vector of optional columns to include in the
+summarisation step (if present in the input data). By default, it attempts
+to include <code>proteinType</code>, <code>proteinCount</code>, <code>proteinRefs</code>, and <code>proteinMaster</code>.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A data frame containing the calculated LPG metrics:</p><dl><dt>isDecoy</dt>
+    <p>A data frame containing the calculated LPG metrics with the following columns:</p><dl><dt>isDecoy</dt>
 <dd><p>Indicates whether the group contains any decoy identification.</p></dd>
 
 <dt>n</dt>

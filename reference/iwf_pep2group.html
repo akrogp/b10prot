@@ -47,7 +47,7 @@ by the number of discriminating peptides, followed by the total number of peptid
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">iwf_pep2group</span><span class="op">(</span><span class="va">pep2prot2group</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">iwf_pep2group</span><span class="op">(</span><span class="va">pep2prot2group</span>, extra_pep_cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -55,15 +55,26 @@ by the number of discriminating peptides, followed by the total number of peptid
 
 
 <dl><dt id="arg-pep-prot-group">pep2prot2group<a class="anchor" aria-label="anchor" href="#arg-pep-prot-group"></a></dt>
-<dd><p>A data frame containing peptide-to-protein-to-group relations,
-including <code>peptideRef</code>, <code>proteinRef</code>, <code>groupRef</code>, and <code>peptideType</code>.</p></dd>
+<dd><p>A data frame containing peptide-to-protein-to-group relations.
+Must include at least <code>peptideRef</code>, <code>proteinRef</code>, <code>groupRef</code>, <code>peptideType</code>, and <code>proteinType</code>.
+It can also contain optional columns such as <code>shared</code>, <code>isDecoy</code>, <code>pepScore</code>, <code>LP</code>, or <code>qval</code>.</p></dd>
+
+
+<dt id="arg-extra-pep-cols">extra_pep_cols<a class="anchor" aria-label="anchor" href="#arg-extra-pep-cols"></a></dt>
+<dd><p>A character vector of additional peptide-level column names
+to include in the summarization step (if present in the input data).
+These are combined with a default set of optional columns
+(<code>shared</code>, <code>isDecoy</code>, <code>pepScore</code>, <code>LP</code>, <code>qval</code>).
+Columns not present in the data are silently ignored.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A data frame where peptides are assigned to protein groups, with additional columns:</p><ul><li><p><code>proteinCount</code>: The number of proteins in each group.</p></li>
-<li><p><code>proteinRefs</code>: A concatenation of all protein references in the group.</p></li>
-<li><p><code>proteinMaster</code>: The first protein of the group.</p></li>
+    <p>A data frame where peptides are assigned to protein groups.
+In addition to the original peptide and group identifiers, the result contains:</p><ul><li><p><code>proteinCount</code>: Number of proteins in each group.</p></li>
+<li><p><code>proteinRefs</code>: Concatenation of all protein references in the group.</p></li>
+<li><p><code>proteinMaster</code>: First protein of the group (after ordering).</p></li>
+<li><p>Any optional peptide-level columns present in the input (e.g. <code>shared</code>, <code>isDecoy</code>, <code>pepScore</code>, <code>LP</code>, <code>qval</code>).</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
