@@ -25,7 +25,11 @@ add_class <- function(obj, new_class) {
 #'
 #' @seealso
 #' - [PAnalyzer: A software tool for protein inference in shotgun proteomics](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-13-288) for more information on the tool.
+#'
+#' @export
 panalyzer <- function(pep2prot) {
+  check_required_cols(pep2prot, c("peptideRef", "proteinRef"))
+
   jar_path <- system.file("PAnalyzer.jar", package = "b10prot")
   tmp_input <- tempfile("pa_input_", fileext = ".tsv")
   tmp_output <- tempfile("pa_output_", fileext = ".tsv")
@@ -66,8 +70,8 @@ panalyzer <- function(pep2prot) {
 #'
 #' @export
 summary.panalyzer <- function(object, ...) {
-  stopifnot(inherits(object, "panalyzer"))
   object %>%
+    check_required_cols(c("isDecoy", "proteinType", "proteinRef", "groupRef")) %>%
     group_by(isDecoy, proteinType) %>%
     summarise(proteins = n_distinct(proteinRef), groups = n_distinct(groupRef), .groups = "drop") %>%
     pivot_wider(names_from = isDecoy, values_from = c(proteins, groups)) %>%
@@ -97,6 +101,8 @@ summary.panalyzer <- function(object, ...) {
 #'
 #' @export
 plot_groups <- function(panalyzer, groupRefs) {
+  check_required_cols(panalyzer, c("groupRef", "peptideRef", "peptideType", "proteinRef", "proteinType"))
+
   colors <- c(
     "unique" = "lightblue",
     "discriminating" = "lightgreen",
@@ -108,13 +114,13 @@ plot_groups <- function(panalyzer, groupRefs) {
     panalyzer %>%
     filter(groupRef %in% groupRefs) %>%
     distinct(peptideRef) %>%
-    as_vector()
+    pull()
 
   tmp_grp <-
     panalyzer %>%
     filter(peptideRef %in% tmp_pep) %>%
     distinct(groupRef) %>%
-    as_vector()
+    pull()
 
   panalyzer %>%
     filter(groupRef %in% tmp_grp) %>%

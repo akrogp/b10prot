@@ -76,6 +76,7 @@ diff_score <- function(score1, score2, lower_better = TRUE) {
 #'
 #' @export
 target_decoy_approach <- function(data, score, lower_better = TRUE ) {
+  check_required_cols(data, c("isDecoy", as_name(enquo(score))))
   DECOYS <- sum(data$isDecoy)
   data %>%
     arrange_score({{score}}, lower_better) %>%
@@ -112,6 +113,7 @@ target_decoy_approach <- function(data, score, lower_better = TRUE ) {
 #' @export
 global_fdr <- function(data) {
   data %>%
+    check_required_cols(c("isDecoy")) %>%
     group_by(isDecoy) %>%
     summarise(count = n()) %>%
     pivot_wider(names_from = isDecoy, values_from = count) %>%
@@ -168,6 +170,7 @@ global_fdr <- function(data) {
 refined_fdr <- function(data, levelRef, score, lower_better = TRUE, affix = "_REVERSED") {
   competition <-
     data %>%
+    check_required_cols(c("isDecoy", as_name(enquo(levelRef)), as_name(enquo(score)))) %>%
     mutate(competitionRef = str_remove({{levelRef}}, affix)) %>%
     select(competitionRef, isDecoy, {{score}}) %>%
     mutate(isDecoy = ifelse(isDecoy, "decoy", "target")) %>%
@@ -245,8 +248,11 @@ refined_fdr <- function(data, levelRef, score, lower_better = TRUE, affix = "_RE
 #' a protein or a gene identifier. This should be an unquoted column name.
 #' @param threshold A numeric value representing the FDR threshold for
 #' peptide-level q-values (default is `0.01`).
+#' @param extra_cols A character vector of optional columns to include in the
+#'   summarisation step (if present in the input data). By default, it attempts
+#'   to include `proteinType`, `proteinCount`, `proteinRefs`, and `proteinMaster`.
 #'
-#' @return A data frame containing the calculated LPG metrics:
+#' @return A data frame containing the calculated LPG metrics with the following columns:
 #' \describe{
 #'   \item{isDecoy}{Indicates whether the group contains any decoy identification.}
 #'   \item{n}{The total number of peptide identifications for the group.}
@@ -273,8 +279,10 @@ refined_fdr <- function(data, levelRef, score, lower_better = TRUE, affix = "_RE
 #' - [Protein Probability Model for High-Throughput Protein Identification by Mass Spectrometry-Based Proteomics](https://pubs.acs.org/doi/10.1021/acs.jproteome.9b00819) for more information on the LPG scores.
 #'
 #' @export
-lpg <- function(data, levelRef, threshold = 0.01) {
+lpg <- function(data, levelRef, threshold = 0.01, extra_cols = c()) {
+  extra_cols <- c(extra_cols, "proteinType", "proteinCount", "proteinRefs", "proteinMaster")
   data %>%
+    check_required_cols(c("isDecoy", "LP", "qval", as_name(enquo(levelRef)))) %>%
     group_by({{levelRef}}) %>%
     summarise(
       isDecoy = any(isDecoy),
@@ -286,10 +294,9 @@ lpg <- function(data, levelRef, threshold = 0.01) {
       LPGM = colog(1 - (1 - 10^(-LPM))^n),
       LPGS = colog(1 - pgamma(LPS*log(10),n)),
       LPGF = ifelse(m == 0, LPGM, colog((1 - pgamma(LPF*log(10),m)) * choose(n, m))),
-      across(everything(), first),
+      across(any_of(extra_cols), first),
       .groups = "drop"
-    ) %>%
-    select(-LP, -qval)
+    )
 }
 
 #' Plot Rank of Decoy Scores

@@ -4,18 +4,27 @@
 \alias{iwf_pep2group}
 \title{Assign Peptides to Protein Groups}
 \usage{
-iwf_pep2group(pep2prot2group)
+iwf_pep2group(pep2prot2group, extra_pep_cols = c())
 }
 \arguments{
-\item{pep2prot2group}{A data frame containing peptide-to-protein-to-group relations,
-including \code{peptideRef}, \code{proteinRef}, \code{groupRef}, and \code{peptideType}.}
+\item{pep2prot2group}{A data frame containing peptide-to-protein-to-group relations.
+Must include at least \code{peptideRef}, \code{proteinRef}, \code{groupRef}, \code{peptideType}, and \code{proteinType}.
+It can also contain optional columns such as \code{shared}, \code{isDecoy}, \code{pepScore}, \code{LP}, or \code{qval}.}
+
+\item{extra_pep_cols}{A character vector of additional peptide-level column names
+to include in the summarization step (if present in the input data).
+These are combined with a default set of optional columns
+(\code{shared}, \code{isDecoy}, \code{pepScore}, \code{LP}, \code{qval}).
+Columns not present in the data are silently ignored.}
 }
 \value{
-A data frame where peptides are assigned to protein groups, with additional columns:
+A data frame where peptides are assigned to protein groups.
+In addition to the original peptide and group identifiers, the result contains:
 \itemize{
-\item \code{proteinCount}: The number of proteins in each group.
-\item \code{proteinRefs}: A concatenation of all protein references in the group.
-\item \code{proteinMaster}: The first protein of the group.
+\item \code{proteinCount}: Number of proteins in each group.
+\item \code{proteinRefs}: Concatenation of all protein references in the group.
+\item \code{proteinMaster}: First protein of the group (after ordering).
+\item Any optional peptide-level columns present in the input (e.g. \code{shared}, \code{isDecoy}, \code{pepScore}, \code{LP}, \code{qval}).
 }
 }
 \description{

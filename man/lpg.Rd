@@ -4,7 +4,7 @@
 \alias{lpg}
 \title{LP Gamma (LPG) Metrics Calculation}
 \usage{
-lpg(data, levelRef, threshold = 0.01)
+lpg(data, levelRef, threshold = 0.01, extra_cols = c())
 }
 \arguments{
 \item{data}{A data frame containing identification data, including
@@ -16,9 +16,13 @@ a protein or a gene identifier. This should be an unquoted column name.}
 
 \item{threshold}{A numeric value representing the FDR threshold for
 peptide-level q-values (default is \code{0.01}).}
+
+\item{extra_cols}{A character vector of optional columns to include in the
+summarisation step (if present in the input data). By default, it attempts
+to include \code{proteinType}, \code{proteinCount}, \code{proteinRefs}, and \code{proteinMaster}.}
 }
 \value{
-A data frame containing the calculated LPG metrics:
+A data frame containing the calculated LPG metrics with the following columns:
 \describe{
 \item{isDecoy}{Indicates whether the group contains any decoy identification.}
 \item{n}{The total number of peptide identifications for the group.}

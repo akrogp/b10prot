@@ -77,6 +77,7 @@ iwf_load_psms <- function(path = ".", pattern = ".mzid", psm_score = NULL, verbo
 #' @export
 iwf_psm2pep <- function(psms, lower_better = TRUE) {
     psms %>%
+        check_required_cols(c("isDecoy", "peptideRef", "psmScore")) %>%
         # peptideRef is the primary key and will be unique in the list
         group_by(peptideRef) %>%
         summarise(
@@ -110,6 +111,7 @@ iwf_psm2pep <- function(psms, lower_better = TRUE) {
 #' @export
 iwf_pep2level <- function(psms, levelRef) {
     psms %>%
+        check_required_cols(c("peptideRef", as_name(enquo(levelRef)))) %>%
         # We obtain a list of peptide-to-protein relations from PSMs
         group_by(peptideRef, {{levelRef}}) %>%
         summarise(.groups = "drop") %>%
@@ -142,6 +144,7 @@ iwf_pep2level <- function(psms, levelRef) {
 iwf_grouping <- function(pep2prot, threshold = 0.01) {
     pa_ok <-
         pep2prot %>%
+        check_required_cols(c("isDecoy", "peptideRef", "proteinRef", "qval")) %>%
         # Builg groups using only peptides passing the FDR threshold
         filter(qval <= threshold) %>%
         # Filter unnecessary information
@@ -181,19 +184,29 @@ iwf_grouping <- function(pep2prot, threshold = 0.01) {
 #' peptides to their respective protein groups. Proteins within a group are ordered
 #' by the number of discriminating peptides, followed by the total number of peptides.
 #'
-#' @param pep2prot2group A data frame containing peptide-to-protein-to-group relations,
-#'   including `peptideRef`, `proteinRef`, `groupRef`, and `peptideType`.
+#' @param pep2prot2group A data frame containing peptide-to-protein-to-group relations.
+#'   Must include at least `peptideRef`, `proteinRef`, `groupRef`, `peptideType`, and `proteinType`.
+#'   It can also contain optional columns such as `shared`, `isDecoy`, `pepScore`, `LP`, or `qval`.
+#' @param extra_pep_cols A character vector of additional peptide-level column names
+#'   to include in the summarization step (if present in the input data).
+#'   These are combined with a default set of optional columns
+#'   (`shared`, `isDecoy`, `pepScore`, `LP`, `qval`).
+#'   Columns not present in the data are silently ignored.
 #'
-#' @return A data frame where peptides are assigned to protein groups, with additional columns:
-#'   - `proteinCount`: The number of proteins in each group.
-#'   - `proteinRefs`: A concatenation of all protein references in the group.
-#'   - `proteinMaster`: The first protein of the group.
+#' @return A data frame where peptides are assigned to protein groups.
+#'   In addition to the original peptide and group identifiers, the result contains:
+#'   - `proteinCount`: Number of proteins in each group.
+#'   - `proteinRefs`: Concatenation of all protein references in the group.
+#'   - `proteinMaster`: First protein of the group (after ordering).
+#'   - Any optional peptide-level columns present in the input (e.g. `shared`, `isDecoy`, `pepScore`, `LP`, `qval`).
 #'
 #' @seealso \code{\link{iwf_grouping}} for generating peptide-to-protein-to-group relations,
 #'   and \code{\link{panalyzer}} for protein grouping.
 #' @export
-iwf_pep2group <- function(pep2prot2group) {
+iwf_pep2group <- function(pep2prot2group, extra_pep_cols = c()) {
+    extra_pep_cols <- c(extra_pep_cols, "shared", "isDecoy", "pepScore", "LP", "qval")
     pep2prot2group %>%
+        check_required_cols(c("peptideRef", "proteinRef", "groupRef", "peptideType", "proteinType")) %>%
         group_by(proteinRef) %>%
         mutate(
             discPeptides = sum(peptideType == "discriminating"),
@@ -207,6 +220,7 @@ iwf_pep2group <- function(pep2prot2group) {
         mutate(proteinMaster = first(proteinRef)) %>%
         ungroup() %>%
         group_by(peptideRef, groupRef) %>%
-        summarise(across(everything(), first), .groups = "drop") %>%
-        select(-proteinRef)
+        summarise(across(any_of(
+            c("peptideType", "proteinType", "proteinCount", "proteinRefs", "proteinMaster",
+            extra_pep_cols)), first), .groups = "drop")
 }
