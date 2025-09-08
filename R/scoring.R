@@ -233,6 +233,120 @@ refined_fdr <- function(data, levelRef, score, lower_better = TRUE, affix = "_RE
     arrange_score({{score}}, lower_better)
 }
 
+#' Refined Group-Level False Discovery Rate (FDRr) Calculation
+#'
+#' This function computes refined False Discovery Rate (FDR) estimates at the protein
+#' group level using a competitive approach. It extends `refined_fdr` by handling
+#' multiple proteins per identification in the target-decoy competition.
+#'
+#' @param data A data frame containing identification data. It must include:
+#'   \itemize{
+#'     \item `proteinMaster`: the main protein identifier for the group.
+#'     \item `proteinRefs`: all proteins associated with the identification, separated by ";".
+#'     \item `isDecoy`: logical indicating whether the identification is a decoy.
+#'     \item A score column used for ranking identifications.
+#'   }
+#' @param score The column name of the score used to rank the identifications.
+#'   This should be an unquoted column name.
+#' @param lower_better Logical; if TRUE, lower scores indicate better identifications (default `TRUE`).
+#' @param affix String indicating the suffix/prefix used to identify decoy entries (default `"_REVERSED"`).
+#'
+#' @return A data frame containing the original data along with additional columns:
+#' \describe{
+#'   \item{FDRn}{Normal FDR estimation as cumulative minimum (q-value).}
+#'   \item{FDRp}{Picked FDR estimation as cumulative minimum (q-value).}
+#'   \item{FDRr}{Refined FDR estimation as cumulative minimum (q-value).}
+#'   \item{to}{Target-only identifications count at the protein group level.}
+#'   \item{do}{Decoy-only identifications count at the protein group level.}
+#'   \item{td}{Count of identifications with equal target and decoy scores.}
+#'   \item{tb}{Target-best identifications count at the protein group level.}
+#'   \item{db}{Decoy-best identifications count at the protein group level.}
+#' }
+#'
+#' @details
+#' The function first expands multiple protein references per identification into
+#' individual rows, removes decoy affixes, and then determines which protein references
+#' are in competition with the proteinMaster. It calculates the FDR estimates by
+#' summing target and decoy identifications across regions (to, do, td, tb, db),
+#' following the competitive approach described in the cited paper.
+#'
+#' @seealso
+#' - [Refined FDR for Single Proteins](https://pubs.acs.org/doi/10.1021/acs.jproteome.9b00819)
+#' - [Competitive Protein Group FDR](https://pubmed.ncbi.nlm.nih.gov/36328188)
+#'
+#' @export
+refined_gfdr <- function(data, score, lower_better = TRUE, affix = "_REVERSED") {
+  competition <-
+    data %>%
+    check_required_cols(c("isDecoy", "proteinMaster", "proteinRefs", as_name(enquo(score)))) %>%
+    separate_rows(proteinRefs, sep = ";") %>%
+    mutate(competitionRef = str_remove(proteinMaster, affix)) %>%
+    mutate(proteinRef = str_remove(proteinRefs, affix)) %>%
+    group_by(proteinRef) %>%
+    mutate(pair = proteinRef %in% competitionRef) %>%
+    ungroup() %>%
+    filter(pair) %>%
+    select(proteinRef, isDecoy, {{score}}) %>%
+    mutate(isDecoy = ifelse(isDecoy, "decoy", "target")) %>%
+    pivot_wider(names_from = isDecoy, values_from = {{score}}) %>%
+    mutate(decoy = (if("decoy" %in% names(.)) decoy else NA)) %>%
+    mutate(region = case_when(
+      is.na(decoy) ~ "to",
+      is.na(target) ~ "do",
+      target == decoy ~ "td",
+      diff_score(target, decoy, lower_better) < 0 ~ "tb",
+      TRUE ~ "db"
+    ))
+
+  data %>%
+    rowwise() %>%
+    mutate(
+      to = sum(
+        diff_score(competition$target, {{score}}, lower_better) <= 0 &
+          (
+            competition$region == "to" |
+              (
+                competition$region == "tb" &
+                  diff_score(competition$decoy, {{score}}, lower_better) > 0
+              )
+          ),
+        na.rm = TRUE),
+      do = sum(
+        diff_score(competition$decoy, {{score}}, lower_better) <= 0 &
+          (
+            competition$region == "do" |
+              (
+                competition$region == "db" &
+                  diff_score(competition$target, {{score}}, lower_better) > 0
+              )
+          ),
+        na.rm = TRUE),
+      td = sum(
+        diff_score(competition$target, {{score}}, lower_better) <= 0 &
+          competition$region == "td",
+        na.rm = TRUE),
+      tb = sum(
+        diff_score(competition$target, {{score}}, lower_better) <= 0 &
+          diff_score(competition$decoy, {{score}}, lower_better) <= 0 &
+          competition$region == "tb",
+        na.rm = TRUE),
+      db = sum(
+        diff_score(competition$target, {{score}}, lower_better) <= 0 &
+          diff_score(competition$decoy, {{score}}, lower_better) <= 0 &
+          competition$region == "db",
+        na.rm = TRUE)
+    ) %>%
+    ungroup() %>%
+    mutate(
+      FDRn = (do + db + tb + td) / (to + db + tb + td),
+      FDRp = (do + db + td) / (to + tb + td),
+      FDRr = (do + 2*db + td) / (db + tb + to + td)
+    ) %>%
+    arrange_score({{score}}, !lower_better) %>%
+    mutate(across(c(FDRn, FDRp, FDRr), cummin)) %>%
+    arrange_score({{score}}, lower_better)
+}
+
 #' LP Gamma (LPG) Metrics Calculation
 #'
 #' This function calculates various LP Gamma (LPG) metrics for a specified

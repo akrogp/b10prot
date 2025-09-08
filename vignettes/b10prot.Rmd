@@ -253,9 +253,9 @@ groups %>%
   global_fdr()
 ```
 
-# Refined FDR
+## Refined FDR
 
-In the identification workflows presented above, we have used the traditional FDR estimation. However, newer FDR estimation methods based on a higher-level (e.g., protein) target-decoy competitive approach can improve sensitivity. This package allows you to compute these FDRs as long as decoy and target identifications share a common name with an optional affix (prefix or suffix).
+In the identification workflows presented above, we have used the traditional FDR estimation. However, newer FDR estimation methods based on a higher-level (e.g., protein-level) target-decoy competitive approach can improve sensitivity. This package allows you to compute these FDRs as long as decoy and target identifications share a common name with an optional affix (prefix or suffix).
 
 ```{r}
 refined_genes <- 
