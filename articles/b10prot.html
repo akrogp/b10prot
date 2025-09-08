@@ -63,9 +63,9 @@
 
     
     
-<div class="section level3">
-<h3 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
-</h3>
+<div class="section level2">
+<h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
+</h2>
 <p>This vignette shows how to build different proteomics identification
 workflows using the <code>b10prot</code> package.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
@@ -77,9 +77,9 @@ workflows using the <code>b10prot</code> package.</p>
 <span></span>
 <span><span class="fu"><a href="https://conflicted.r-lib.org/reference/conflicts_prefer.html" class="external-link">conflicts_prefer</a></span><span class="op">(</span><span class="fu">dplyr</span><span class="fu">::</span><span class="va"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">)</span></span></code></pre></div>
 </div>
-<div class="section level3">
-<h3 id="loading-psms">Loading PSMs<a class="anchor" aria-label="anchor" href="#loading-psms"></a>
-</h3>
+<div class="section level2">
+<h2 id="loading-psms">Loading PSMs<a class="anchor" aria-label="anchor" href="#loading-psms"></a>
+</h2>
 <p>The initial input for the identification workflows presented here
 consists of a list of Peptide-to-Spectrum Matches (PSMs) that must have
 been previously generated using any search engine. This list of PSMs
@@ -122,9 +122,9 @@ of the human proteome</a>. For this search, we used the <a href="https://msgfplu
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">psms</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
-<div class="section level3">
-<h3 id="peptide-identifications">Peptide identifications<a class="anchor" aria-label="anchor" href="#peptide-identifications"></a>
-</h3>
+<div class="section level2">
+<h2 id="peptide-identifications">Peptide identifications<a class="anchor" aria-label="anchor" href="#peptide-identifications"></a>
+</h2>
 <p>From the list of PSMs, we obtain a list of peptides by selecting the
 best PSM for each peptide, and then we calculate peptide confidence
 scores using the target-decoy approach:</p>
@@ -144,9 +144,9 @@ peptides by setting a peptide-level FDR threshold:</p>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">qval</span> <span class="op">&lt;=</span> <span class="fl">0.01</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
 <span>    <span class="fu"><a href="../reference/global_fdr.html">global_fdr</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
-<div class="section level3">
-<h3 id="protein-identifications">Protein identifications<a class="anchor" aria-label="anchor" href="#protein-identifications"></a>
-</h3>
+<div class="section level2">
+<h2 id="protein-identifications">Protein identifications<a class="anchor" aria-label="anchor" href="#protein-identifications"></a>
+</h2>
 <p>To obtain a list of protein identifications, we compute a
 protein-level score using the scores of the corresponding peptides and
 then apply a protein-level FDR. We use LPGF as the protein-level score
@@ -190,9 +190,9 @@ protein-level FDR threshold:</p>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">qval</span> <span class="op">&lt;=</span> <span class="fl">0.01</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
 <span>  <span class="fu"><a href="../reference/global_fdr.html">global_fdr</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
-<div class="section level3">
-<h3 id="gene-identifications">Gene identifications<a class="anchor" aria-label="anchor" href="#gene-identifications"></a>
-</h3>
+<div class="section level2">
+<h2 id="gene-identifications">Gene identifications<a class="anchor" aria-label="anchor" href="#gene-identifications"></a>
+</h2>
 <p>Since we have used only unique peptides in the previous section,
 protein isoforms from the same gene that share the same peptide
 sequences would have been removed. To minimize the effect of this
@@ -237,9 +237,9 @@ FDR threshold:</p>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">qval</span> <span class="op">&lt;=</span> <span class="fl">0.01</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
 <span>  <span class="fu"><a href="../reference/global_fdr.html">global_fdr</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
-<div class="section level3">
-<h3 id="protein-groups">Protein groups<a class="anchor" aria-label="anchor" href="#protein-groups"></a>
-</h3>
+<div class="section level2">
+<h2 id="protein-groups">Protein groups<a class="anchor" aria-label="anchor" href="#protein-groups"></a>
+</h2>
 <p>Although working at the gene level reduces the number of shared
 peptide sequences, we may still remove peptides whose sequences are
 shared between proteins from different genes. To avoid this problem, we
@@ -296,10 +296,10 @@ threshold:</p>
 </h2>
 <p>In the identification workflows presented above, we have used the
 traditional FDR estimation. However, newer FDR estimation methods based
-on a higher-level (e.g., protein) target-decoy competitive approach can
-improve sensitivity. This package allows you to compute these FDRs as
-long as decoy and target identifications share a common name with an
-optional affix (prefix or suffix).</p>
+on a higher-level (e.g., protein-level) target-decoy competitive
+approach can improve sensitivity. This package allows you to compute
+these FDRs as long as decoy and target identifications share a common
+name with an optional affix (prefix or suffix).</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">refined_genes</span> <span class="op">&lt;-</span> </span>
 <span>  <span class="va">pep2gene</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
