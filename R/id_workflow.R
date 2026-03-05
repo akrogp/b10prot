@@ -5,18 +5,18 @@ load_psms <- function(mzid_file, verbose = TRUE) {
         sprintf("Loading %s...", mzid_file) %>%
             print()
     data_mzid <-
-        openIDfile(mzid_file)
+        mzR::openIDfile(mzid_file)
     if( verbose )
-        mzidInfo(data_mzid) %>%
+        mzR::mzidInfo(data_mzid) %>%
             print()
     data_psms <-
         data_mzid %>%
-        psms() %>%
+        mzR::psms() %>%
         as_tibble()
         #mutate(SpectraSource = basename(mzidInfo(data_mzid)$SpectraSource), .before = 1)
     data_scores <-
         data_mzid %>%
-        score() %>%
+        mzR::score() %>%
         as_tibble()
     data_psms %>%
         bind_cols(data_scores %>% select(-spectrumID))
@@ -40,6 +40,8 @@ load_psms <- function(mzid_file, verbose = TRUE) {
 #'
 #' @export
 iwf_load_psms <- function(path = ".", pattern = ".mzid", psm_score = NULL, verbose = FALSE) {
+    if (!requireNamespace("mzR", quietly = TRUE))
+      stop("For using this function you need to install the 'mzR' package")
     if( !file.exists(path) )
         stop("Path not found")
     psms <-

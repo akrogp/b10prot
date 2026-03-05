@@ -27,11 +27,10 @@ colog <- function(prob) {
 }
 
 arrange_score <- function(data, score, lower_better = TRUE) {
-  data %>%
-    arrange(case_when(
-      lower_better ~ {{score}},
-      TRUE ~ desc({{score}})
-    ))
+  if( lower_better )
+    data %>% arrange({{score}})
+  else
+    data %>% arrange(desc({{score}}))
 }
 
 diff_score <- function(score1, score2, lower_better = TRUE) {
@@ -55,6 +54,8 @@ diff_score <- function(score1, score2, lower_better = TRUE) {
 #' This should be an unquoted column name.
 #' @param lower_better A logical value indicating whether lower scores are
 #' better (default is `TRUE`).
+#' @param unbiased When set to `TRUE`, one is added to the decoy and target
+#' counts before FDR calculation. This adjustment can reduce bias in small datasets.
 #'
 #' @return A data frame with the original data and additional columns:
 #' \describe{
@@ -75,12 +76,14 @@ diff_score <- function(score1, score2, lower_better = TRUE) {
 #' target_decoy_approach(sample_data, score, lower_better = TRUE)
 #'
 #' @export
-target_decoy_approach <- function(data, score, lower_better = TRUE ) {
+target_decoy_approach <- function(data, score, lower_better = TRUE, unbiased = FALSE ) {
   check_required_cols(data, c("isDecoy", as_name(enquo(score))))
   DECOYS <- sum(data$isDecoy)
   data %>%
     arrange_score({{score}}, lower_better) %>%
     mutate(decoys = cumsum(isDecoy), targets = cumsum(!isDecoy)) %>%
+    mutate(decoys = if(unbiased) decoys + 1 else decoys) %>%
+    mutate(target = if(unbiased) targets + 1 else targets) %>%
     group_by({{score}}) %>%
     mutate(decoys = max(decoys), targets = max(targets)) %>%
     ungroup() %>%
@@ -231,6 +234,93 @@ refined_fdr <- function(data, levelRef, score, lower_better = TRUE, affix = "_RE
     arrange_score({{score}}, !lower_better) %>%
     mutate(across(c(FDRn, FDRp, FDRr), cummin)) %>%
     arrange_score({{score}}, lower_better)
+}
+
+#' Picked Protein Group FDR
+#'
+#' Implements the picked protein group false discovery rate (FDR) strategy as
+#' described by The et al. (2022).
+#'
+#' @param data A tibble containing protein group information. Must include at
+#' least the columns groupRef, proteinMaster, proteinRefs, isDecoy and the scoring
+#' column provided in score.
+#' @param score The column name of the score used to rank the identifications.
+#'   This should be an unquoted column name.
+#' @param lower_better Logical; if TRUE, lower scores indicate better identifications (default `TRUE`).
+#' @param affix String indicating the suffix/prefix used to identify decoy entries (default `"_REVERSED"`).
+#'
+#' @return A tibble containing the subset of protein groups that passed the
+#' picked protein group filtering and the subsequent target-decoy FDR analysis.
+#' The output will typically include the original columns from data and any
+#' additional FDR-related metrics added by target_decoy_approach().
+#'
+#' @details
+#' Protein groups are first sorted by a scoring column, and for each leading protein
+#' any subsequent group containing it within its members is removed.
+#'
+#' Internally, the function:
+#' \enumerate{
+#' \item Normalizes protein identifiers by removing the affix (decoy tag).
+#' \item Orders protein groups according to the chosen score and direction.
+#' \item Compares each group against subsequent groups to do the competition.
+#' \item Retains only the winner groups.
+#' \item Applies a target-decoy approach to estimate FDR.
+#' }
+#'
+#' @references
+#' The M, Samaras P, Kuster B, Wilhelm M.
+#' Reanalysis of ProteomicsDB Using an Accurate, Sensitive, and Scalable False
+#' Discovery Rate Estimation Approach for Protein Groups.
+#' Mol Cell Proteomics. 2022 Dec;21(12):100437. \doi{10.1016/j.mcpro.2022.100437}
+#'
+#' @examples
+#' library(dplyr)
+#' library(stringr)
+#'
+#' df <- tibble(
+#'   groupRef = c("a", "b", "c", "d", "e", "f_REVERSED", "f"),
+#'   proteinMaster = c("a", "b", "c", "d", "e", "f_REVERSED", "f"),
+#'   proteinRefs = c(
+#'     "a;x",
+#'     "a_REVERSED;b_REVERSED",
+#'     "b_REVERSED;c_REVERSED;x_REVERSED",
+#'     "d",
+#'     "e;d",
+#'     "f_REVERSED",
+#'     "f"
+#'   ),
+#'   score = 7:1
+#' ) %>%
+#'   mutate(isDecoy = str_detect(proteinRefs, "_REVERSED"))
+#'
+#' result <- pgT(df, score, lower_better = FALSE)
+#' glimpse(result)
+#'
+#' @seealso [target_decoy_approach()]
+#'
+#' @keywords internal
+picked_gfdr <- function(data, score, lower_better = TRUE, affix = "_REVERSED") {
+  data %>%
+    check_required_cols(c("groupRef", "proteinMaster", "proteinRefs", "isDecoy", as_name(enquo(score)))) %>%
+    select(groupRef, proteinMaster, proteinRefs, {{score}}) %>%
+    mutate(proteinMaster = str_remove(proteinMaster, affix)) %>%
+    mutate(proteinRefs = str_remove(proteinRefs, affix)) %>%
+    arrange_score({{score}}, lower_better) %>%
+    mutate(idx = row_number()) %>%
+    cross_join(., .) %>%
+    filter(idx.y >= idx.x) %>%
+    mutate(proteinRefs.y = str_split(proteinRefs.y, ";")) %>%
+    rowwise() %>%
+    mutate(keep.y = !(proteinMaster.x %in% proteinRefs.y)) %>%
+    ungroup() %>%
+    mutate(keep.y = ifelse(groupRef.x == groupRef.y, TRUE, keep.y)) %>%
+    group_by(groupRef.y) %>%
+    summarise(keep = all(keep.y)) %>%
+    rename(groupRef = groupRef.y) %>%
+    filter(keep) %>%
+    select(-keep) %>%
+    inner_join(data, by = join_by(groupRef)) %>%
+    target_decoy_approach({{score}}, lower_better)
 }
 
 #' Refined Group-Level False Discovery Rate (FDRr) Calculation

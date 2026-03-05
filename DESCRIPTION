@@ -21,7 +21,6 @@ Imports:
     conflicted,
     rlang,
     readr,
-    mzR,
     dplyr,
     tidyr,
     stringr,
@@ -29,6 +28,7 @@ Imports:
     ggplot2,
     ggforce
 Suggests: 
+    mzR,
     knitr,
     rmarkdown
 VignetteBuilder: knitr

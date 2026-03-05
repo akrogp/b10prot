@@ -50,6 +50,6 @@ following the competitive approach described in the cited paper.
 \seealso{
 \itemize{
 \item \href{https://pubs.acs.org/doi/10.1021/acs.jproteome.9b00819}{Refined FDR for Single Proteins}
-\item \href{https://www.mcponline.org/article/S1535-9476(22)00245-6/fulltext}{Competitive Protein Group FDR}
+\item \href{https://pubmed.ncbi.nlm.nih.gov/36328188}{Competitive Protein Group FDR}
 }
 }

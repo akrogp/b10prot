@@ -4,7 +4,7 @@
 \alias{target_decoy_approach}
 \title{Target-Decoy Approach for FDR Estimation}
 \usage{
-target_decoy_approach(data, score, lower_better = TRUE)
+target_decoy_approach(data, score, lower_better = TRUE, unbiased = FALSE)
 }
 \arguments{
 \item{data}{A data frame containing the identification data. It must
@@ -16,6 +16,9 @@ This should be an unquoted column name.}
 
 \item{lower_better}{A logical value indicating whether lower scores are
 better (default is \code{TRUE}).}
+
+\item{unbiased}{When set to \code{TRUE}, one is added to the decoy and target
+counts before FDR calculation. This adjustment can reduce bias in small datasets.}
 }
 \value{
 A data frame with the original data and additional columns:
