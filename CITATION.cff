@@ -1,0 +1,26 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "b10prot"
+version: 1.0.0
+authors:
+  - family-names: Prieto
+    given-names: Gorka
+    email: gorka.prieto@ehu.eus
+    orcid: "https://orcid.org/0000-0002-6433-8452"
+url: "https://akrogp.github.io/b10prot/"
+repository-code: "https://github.com/akrogp/b10prot"
+license: GPL-3.0
+preferred-citation:
+  type: article
+  title: "Improved Protein Identification in Shotgun Proteomics with a Group-Level Extension of the LPGF Model"
+  authors:
+    - family-names: Prieto
+      given-names: Gorka
+      orcid: "https://orcid.org/0000-0002-6433-8452"
+    - family-names: Vázquez
+      given-names: Jesús
+  journal: "Journal of Proteome Research"
+  year: 2026
+  doi: "10.1021/acs.jproteome.5c01253"
+  url: "https://doi.org/10.1021/acs.jproteome.5c01253"

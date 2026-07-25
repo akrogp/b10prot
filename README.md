@@ -77,3 +77,13 @@ devtools::install_github("akrogp/b10prot")
 ## Tutorials
 
 You can learn more in `vignette("b10prot")`.
+
+## Citation
+
+If you use b10prot in your research, please cite:
+
+> Prieto, G. and Vázquez, J. (2026). Improved Protein Identification in
+> Shotgun Proteomics with a Group-Level Extension of the LPGF Model.
+> *Journal of Proteome Research*. <https://doi.org/10.1021/acs.jproteome.5c01253>
+
+You can also retrieve this citation from within R with `citation("b10prot")`.

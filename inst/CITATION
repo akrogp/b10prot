@@ -1,0 +1,18 @@
+bibentry(
+  bibtype  = "Article",
+  title    = "Improved Protein Identification in Shotgun Proteomics with a Group-Level Extension of the LPGF Model",
+  author   = c(
+    person("Gorka", "Prieto"),
+    person("Jesús", "Vázquez")
+  ),
+  journal  = "Journal of Proteome Research",
+  year     = "2026",
+  doi      = "10.1021/acs.jproteome.5c01253",
+  url      = "https://doi.org/10.1021/acs.jproteome.5c01253",
+  textVersion = paste(
+    "Prieto, G. and Vázquez, J. (2026).",
+    "Improved Protein Identification in Shotgun Proteomics with a Group-Level Extension of the LPGF Model.",
+    "Journal of Proteome Research.",
+    "https://doi.org/10.1021/acs.jproteome.5c01253"
+  )
+)

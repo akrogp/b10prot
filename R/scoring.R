@@ -293,7 +293,7 @@ refined_fdr <- function(data, levelRef, score, lower_better = TRUE, affix = "_RE
 #' ) %>%
 #'   mutate(isDecoy = str_detect(proteinRefs, "_REVERSED"))
 #'
-#' result <- pgT(df, score, lower_better = FALSE)
+#' result <- b10prot:::picked_gfdr(df, score, lower_better = FALSE)
 #' glimpse(result)
 #'
 #' @seealso [target_decoy_approach()]

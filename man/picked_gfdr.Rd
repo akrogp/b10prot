@@ -61,7 +61,7 @@ df <- tibble(
 ) \%>\%
   mutate(isDecoy = str_detect(proteinRefs, "_REVERSED"))
 
-result <- pgT(df, score, lower_better = FALSE)
+result <- b10prot:::picked_gfdr(df, score, lower_better = FALSE)
 glimpse(result)
 
 }
