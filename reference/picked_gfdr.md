@@ -99,8 +99,20 @@ df <- tibble(
 ) %>%
   mutate(isDecoy = str_detect(proteinRefs, "_REVERSED"))
 
-result <- pgT(df, score, lower_better = FALSE)
-#> Error in pgT(df, score, lower_better = FALSE): could not find function "pgT"
+result <- b10prot:::picked_gfdr(df, score, lower_better = FALSE)
 glimpse(result)
-#> Error: object 'result' not found
+#> Rows: 3
+#> Columns: 12
+#> $ groupRef      <chr> "a", "d", "f_REVERSED"
+#> $ proteinMaster <chr> "a", "d", "f_REVERSED"
+#> $ proteinRefs   <chr> "a;x", "d", "f_REVERSED"
+#> $ score         <int> 7, 4, 2
+#> $ isDecoy       <lgl> FALSE, FALSE, TRUE
+#> $ decoys        <int> 0, 0, 1
+#> $ targets       <int> 1, 2, 2
+#> $ target        <int> 1, 2, 2
+#> $ pval          <dbl> 0.5, 0.5, 0.5
+#> $ LP            <dbl> 0.30103, 0.30103, 0.30103
+#> $ FDR           <dbl> 0.0, 0.0, 0.5
+#> $ qval          <dbl> 0.0, 0.0, 0.5
 ```

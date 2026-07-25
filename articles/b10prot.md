@@ -6,6 +6,7 @@ This vignette shows how to build different proteomics identification
 workflows using the `b10prot` package.
 
 ``` r
+
 library(conflicted)
 library(dplyr)
 library(tidyr)
@@ -44,6 +45,7 @@ Engine](https://msgfplus.github.io/) within
 [SearchGUI](https://compomics.github.io/projects/searchgui).
 
 ``` r
+
 psms <- 
   # Load PSMs from mzIdentML files
   iwf_load_psms(
@@ -63,6 +65,7 @@ psms <-
 ```
 
 ``` r
+
 psms %>% glimpse()
 ```
 
@@ -73,6 +76,7 @@ best PSM for each peptide, and then we calculate peptide confidence
 scores using the target-decoy approach:
 
 ``` r
+
 peptides <- 
   psms %>%
   # Best PSM per peptide
@@ -87,6 +91,7 @@ If we are only interested in peptides, we can obtain the identified
 peptides by setting a peptide-level FDR threshold:
 
 ``` r
+
 peptides %>% 
     filter(qval <= 0.01) %>% 
     global_fdr()
@@ -105,6 +110,7 @@ peptide-to-protein relations from the initial PSMs and then merge the
 peptide-level scores from the peptide list:
 
 ``` r
+
 pep2prot <- 
   # Peptide-to-protein relations
   iwf_pep2level(psms, levelRef = proteinRef) %>% 
@@ -118,6 +124,7 @@ Now, we can collapse these relationships into a list of protein
 identifications with protein-level scores:
 
 ``` r
+
 proteins <- 
   pep2prot %>% 
   # Only consider unique (i.e. not shared) peptides
@@ -135,6 +142,7 @@ proteins follows a uniform distribution. We can see that the LPGF scores
 perform as expected:
 
 ``` r
+
 proteins %>% 
   plot_rank()
 ```
@@ -143,6 +151,7 @@ Finally, we can obtain the identified proteins by applying a
 protein-level FDR threshold:
 
 ``` r
+
 proteins %>% 
   filter(qval <= 0.01) %>% 
   global_fdr()
@@ -162,6 +171,7 @@ obtain the peptide-to-gene relations from the initial PSMs and then
 merge the peptide-level scores from the peptide list:
 
 ``` r
+
 pep2gene <- 
   # Peptide-to-gene relations
   iwf_pep2level(psms, levelRef = geneRef) %>% 
@@ -175,6 +185,7 @@ Now, we can collapse these relationships into a list of gene
 identifications with gene-level scores:
 
 ``` r
+
 genes <- 
   pep2gene %>% 
   # Only consider unique (i.e. not shared) peptides
@@ -192,6 +203,7 @@ genes follows a uniform distribution. We can see that the LPGF scores
 perform as expected:
 
 ``` r
+
 genes %>% 
   plot_rank()
 ```
@@ -200,6 +212,7 @@ Finally, we can obtain the identified genes by applying a gene-level FDR
 threshold:
 
 ``` r
+
 genes %>% 
   filter(qval <= 0.01) %>% 
   global_fdr()
@@ -217,6 +230,7 @@ To build these protein groups, we use the PAnalyzer algorithm. An
 example is included with this package:
 
 ``` r
+
 data(example_panalyzer, package = "b10prot")
 plot_groups(example_panalyzer, groupRefs = 1:5)
 ```
@@ -227,6 +241,7 @@ peptide-to-protein-to-group relations along with the corresponding
 peptide and protein types:
 
 ``` r
+
 pep2prot2group <- 
   pep2prot %>% 
   iwf_grouping()
@@ -239,6 +254,7 @@ From these relations, we can obtain the list of protein group
 identifications with their corresponding scores:
 
 ``` r
+
 groups <- 
   pep2prot2group %>% 
   # Instead of iwf_pep2level() we use iwf_pep2group() to retain the list of proteins within each group
@@ -259,6 +275,7 @@ In a manner equivalent to the protein or gene identification workflow,
 we can test the score distribution of the decoy protein groups:
 
 ``` r
+
 groups %>% 
   plot_rank()
 ```
@@ -267,6 +284,7 @@ And also report a list of groups passing a protein group-level FDR
 threshold:
 
 ``` r
+
 groups %>% 
   filter(qval <= 0.01) %>% 
   global_fdr()
@@ -282,6 +300,7 @@ these FDRs as long as decoy and target identifications share a common
 name with an optional affix (prefix or suffix).
 
 ``` r
+
 refined_genes <- 
   pep2gene %>% 
   # Only consider unique (i.e. not shared) peptides
@@ -300,6 +319,7 @@ And finally, use the refined FDR as a threshold for reported
 identifications:
 
 ``` r
+
 refined_genes %>% 
     filter(FDRr <= 0.01) %>% 
     global_fdr()

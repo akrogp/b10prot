@@ -7,14 +7,16 @@
 
 ## Citation
 
-Prieto G (2026). *b10prot: Protein Identification for Shotgun Proteomics
-Data*. R package version 0.0.0.9000,
-<https://akrogp.github.io/b10prot/>.
+Prieto, G. and Vázquez, J. (2026). Improved Protein Identification in
+Shotgun Proteomics with a Group-Level Extension of the LPGF Model.
+Journal of Proteome Research.
+https://doi.org/10.1021/acs.jproteome.5c01253
 
-    @Manual{,
-      title = {b10prot: Protein Identification for Shotgun Proteomics Data},
-      author = {Gorka Prieto},
+    @Article{,
+      title = {Improved Protein Identification in Shotgun Proteomics with a Group-Level Extension of the LPGF Model},
+      author = {Gorka Prieto and Jesús Vázquez},
+      journal = {Journal of Proteome Research},
       year = {2026},
-      note = {R package version 0.0.0.9000},
-      url = {https://akrogp.github.io/b10prot/},
+      doi = {10.1021/acs.jproteome.5c01253},
+      url = {https://doi.org/10.1021/acs.jproteome.5c01253},
     }
